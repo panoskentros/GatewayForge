@@ -1,0 +1,59 @@
+{
+  "realm": "gateway-forge",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 300,
+  "roles": {
+    "realm": [
+      {
+        "name": "secure-user",
+        "description": "May call /api/secure/* (token-relay route)"
+      },
+      {
+        "name": "internal-user",
+        "description": "May call /api/internal/* (edge-offloaded route)"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "gateway-client",
+      "name": "Gateway test client",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["/*"],
+      "webOrigins": ["/*"],
+      "protocolMappers": [
+        {
+          "name": "gateway-forge-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "gateway-forge-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "testuser",
+      "enabled": true,
+      "email": "testuser@test.com",
+      "emailVerified": true,
+      "firstName": "test",
+      "lastName": "user",
+      "credentials": [
+        { "type": "password", "value": "123456", "temporary": false }
+      ],
+      "realmRoles": ["default-roles-gateway-forge", "secure-user", "internal-user"]
+    }
+  ]
+}

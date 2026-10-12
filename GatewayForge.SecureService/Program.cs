@@ -1,33 +1,30 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using GatewayForge.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseUrls("http://localhost:5001");
+builder.Services.AddGatewayForgeJwtAuthentication(builder.Configuration);
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = "http://localhost:8080/realms/gateway-forge";
-        options.Audience = "account";
-        options.RequireHttpsMetadata = false;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            NameClaimType = "preferred_username"
-        };
-    });
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(GatewayPolicies.SecureAccess, policy => policy
+        .RequireAuthenticatedUser()
+        .RequireRole(GatewayRoles.SecureUser));
 
-builder.Services.AddAuthorization();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
+app.UseCorrelationId();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHealthChecks("/health");
 
 app.MapGet("/api/secure-data", (HttpContext context) =>
 {
     var user = context.User.Identity?.Name ?? "Unknown";
     return Results.Ok(new { message = "Hello from Secure Service (Zero-Trust Token Relay)", user });
-});
+}).RequireAuthorization(GatewayPolicies.SecureAccess);
 
 app.Run();
+
+public partial class Program { }

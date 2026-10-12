@@ -1,0 +1,12 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.idea/
+.git/
+.gitignore
+.env
+.env.*
+GatewayForge.Tests/
+keycloak/
+*.md
+docker-compose*.yml

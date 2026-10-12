@@ -1,35 +1,119 @@
+x-dotnet-service: &dotnet-service
+  environment: &dotnet-env
+    Logging__Console__FormatterName: json
+    Logging__Console__FormatterOptions__IncludeScopes: "true"
+  healthcheck: &dotnet-healthcheck
+    test:
+      - CMD
+      - bash
+      - -c
+      - |-
+        exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /health HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3 && head -n1 <&3 | grep -q ' 200 '
+    interval: 10s
+    timeout: 3s
+    retries: 6
+    start_period: 10s
+
 services:
   postgres:
     image: postgres:15-alpine
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
-      - gateway-net
+      - data-net
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.1
-    command: start-dev
+    command: start-dev --import-realm
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
       KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: password
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:?Set KEYCLOAK_ADMIN in .env}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Set KEYCLOAK_ADMIN_PASSWORD in .env}
+      KC_HOSTNAME_URL: http://localhost:8080
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import:ro
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - |-
+          exec 3<>/dev/tcp/127.0.0.1/8080 && echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && cat <&3 | grep -q '"status": "UP"'
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
-      - gateway-net
+      - edge-net
+      - services-net
+      - data-net
+
+  gateway:
+    build:
+      context: .
+      dockerfile: GatewayForge.Gateway/Dockerfile
+    <<: *dotnet-service
+    environment:
+      <<: *dotnet-env
+      Gateway__SharedKey: ${GATEWAY_SHARED_KEY:?Set GATEWAY_SHARED_KEY in .env}
+    ports:
+      - "127.0.0.1:5100:8080"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      secure-service:
+        condition: service_healthy
+      internal-service:
+        condition: service_healthy
+    networks:
+      - edge-net
+      - services-net
+
+  secure-service:
+    build:
+      context: .
+      dockerfile: GatewayForge.SecureService/Dockerfile
+    <<: *dotnet-service
+    networks:
+      - services-net
+
+  internal-service:
+    build:
+      context: .
+      dockerfile: GatewayForge.InternalService/Dockerfile
+    <<: *dotnet-service
+    environment:
+      <<: *dotnet-env
+      Gateway__SharedKey: ${GATEWAY_SHARED_KEY:?Set GATEWAY_SHARED_KEY in .env}
+    networks:
+      - services-net
 
 volumes:
   pgdata:
 
 networks:
-  gateway-net:
+  edge-net:
     driver: bridge
+  services-net:
+    driver: bridge
+    internal: true
+  data-net:
+    driver: bridge
+    internal: true

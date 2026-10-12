@@ -2,4 +2,6 @@
   <Project Path="GatewayForge.Gateway/GatewayForge.Gateway.csproj" />
   <Project Path="GatewayForge.InternalService/GatewayForge.InternalService.csproj" />
   <Project Path="GatewayForge.SecureService/GatewayForge.SecureService.csproj" />
+  <Project Path="GatewayForge.Shared/GatewayForge.Shared.csproj" />
+  <Project Path="GatewayForge.Tests/GatewayForge.Tests.csproj" />
 </Solution>

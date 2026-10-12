@@ -44,3 +44,9 @@ appsettings.Local.json
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# ==================================
+# Docker Compose secrets
+# ==================================
+# Real values live in .env (never committed); .env.example documents the keys.
+.env
