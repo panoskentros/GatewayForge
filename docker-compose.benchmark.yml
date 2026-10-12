@@ -1,0 +1,11 @@
+services:
+  gateway:
+    environment:
+      RateLimiting__PermitLimit: "1000000000"
+      Logging__LogLevel__Default: Warning
+  secure-service:
+    environment:
+      Logging__LogLevel__Default: Warning
+  internal-service:
+    environment:
+      Logging__LogLevel__Default: Warning
