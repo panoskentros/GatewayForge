@@ -65,6 +65,18 @@ Edge offload (`/api/internal`) compared with re-authenticating at the service (`
 - Past about 16,000 busy connections the system is up but queueing (seconds of latency), and the load generator is itself a bottleneck.
 - Method, per-pass data and caveats: [RESULTS.md](GatewayForge.LoadTest/RESULTS.md).
 
+## When to use which
+
+| | Edge offload (`/api/internal`) | Re-authenticate (`/api/secure`) |
+|---|---|---|
+| Speed in these tests | 1.3x to 1.65x the throughput | 25% to 40% lower throughput |
+| Work in the service | None: it reads `X-User-Id` | Validates the JWT, issuer, audience and role itself |
+| If the gateway is bypassed | Only the shared `X-Gateway-Key` and network isolation stand in the way | Still safe: no valid token, no access |
+| If the gateway key leaks | Anyone holding it can act as any user | Not affected |
+| Fits | Internal services behind a private network where the gateway is the only way in | Sensitive data, several teams, or any service reachable by more than one path |
+
+Offload where the network boundary is trustworthy and speed matters. Re-authenticate where a bypassed or compromised gateway must not mean a compromised service. They can coexist, as they do here.
+
 ## Test
 
 ```bash
