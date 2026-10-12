@@ -1,0 +1,46 @@
+# ==================================
+# .NET / C# Build Outputs
+# ==================================
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+TestResults/
+*.TestResults/
+
+# ==================================
+# IDE / Editor Folders
+# ==================================
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+
+# ==================================
+# Local configuration and secrets
+# ==================================
+# Exclude local environment configurations
+appsettings.Development.json
+appsettings.Local.json
+
+# User-specific files
+*.rsuser
+*.suo
+
+# ==================================
+# Docker and OS files
+# ==================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini

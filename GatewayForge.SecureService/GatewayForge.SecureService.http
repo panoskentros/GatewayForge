@@ -1,0 +1,6 @@
+@GatewayForge.SecureService_HostAddress = http://localhost:5055
+
+GET {{GatewayForge.SecureService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

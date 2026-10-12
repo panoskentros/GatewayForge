@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="GatewayForge.Gateway/GatewayForge.Gateway.csproj" />
+  <Project Path="GatewayForge.InternalService/GatewayForge.InternalService.csproj" />
+  <Project Path="GatewayForge.SecureService/GatewayForge.SecureService.csproj" />
+</Solution>
