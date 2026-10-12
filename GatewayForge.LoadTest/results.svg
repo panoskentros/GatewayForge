@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="672" viewBox="0 0 880 672" role="img" aria-labelledby="t d">
+<title id="t">Edge offload vs re-authenticating, from 8 to 16,384 concurrent connections</title>
+<desc id="d">Two panels. Top: requests per second for both paths. Bottom: p99 latency on a log scale. Edge offload is 1.3x to 1.7x faster at every level.</desc>
+<style>
+  text { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .title { font-size: 16px; font-weight: 600; fill: #1f2328; }
+  .panel { font-size: 13px; font-weight: 600; fill: #1f2328; }
+  .sub   { font-size: 12px; fill: #59636e; }
+  .axis  { font-size: 12px; fill: #59636e; }
+  .val   { font-size: 10px; fill: #59636e; }
+  .gain  { font-size: 14px; font-weight: 600; fill: #1a7f64; }
+  .over  { font-size: 11px; font-style: italic; fill: #9a6700; }
+  .grid  { stroke: #d1d9e0; stroke-width: 1; }
+  .base  { stroke: #818b98; stroke-width: 1; }
+  .zone  { fill: #9a6700; opacity: 0.07; }
+  .secure   { fill: #8c959f; }
+  .internal { fill: #1a7f64; }
+  @media (prefers-color-scheme: dark) {
+    .title, .panel { fill: #f0f6fc; }
+    .sub, .axis, .val { fill: #9198a1; }
+    .gain  { fill: #3fb68b; }
+    .over  { fill: #d29922; }
+    .grid  { stroke: #30363d; }
+    .base  { stroke: #6e7681; }
+    .zone  { fill: #d29922; opacity: 0.10; }
+    .secure   { fill: #6e7681; }
+    .internal { fill: #3fb68b; }
+  }
+</style>
+<text class="title" x="72" y="28">Edge offload vs re-authenticating at the service, 8 to 16,384 concurrent connections</text>
+<text class="sub" x="72" y="48">Same gateway authentication on both paths. Load generator inside Docker, mean of two passes.</text>
+<rect class="secure" x="72" y="62" width="12" height="12" rx="2"/>
+<text class="sub" x="90" y="73">Re-authenticates at the service (/api/secure)</text>
+<rect class="internal" x="382" y="62" width="12" height="12" rx="2"/>
+<text class="sub" x="400" y="73">Edge offload (/api/internal)</text>
+<text class="panel" x="72" y="108">Throughput, requests per second (higher is better)</text>
+<line class="base" x1="72" y1="336.0" x2="856" y2="336.0"/>
+<text class="axis" x="64" y="340.0" text-anchor="end">0</text>
+<line class="grid" x1="72" y1="288.5" x2="856" y2="288.5"/>
+<text class="axis" x="64" y="292.5" text-anchor="end">10k</text>
+<line class="grid" x1="72" y1="241.0" x2="856" y2="241.0"/>
+<text class="axis" x="64" y="245.0" text-anchor="end">20k</text>
+<line class="grid" x1="72" y1="193.5" x2="856" y2="193.5"/>
+<text class="axis" x="64" y="197.5" text-anchor="end">30k</text>
+<line class="grid" x1="72" y1="146.0" x2="856" y2="146.0"/>
+<text class="axis" x="64" y="150.0" text-anchor="end">40k</text>
+<text class="panel" x="72" y="366">p99 latency, log scale (lower is better)</text>
+<line class="base" x1="72" y1="558.0" x2="856" y2="558.0"/>
+<text class="axis" x="64" y="562.0" text-anchor="end">1 ms</text>
+<line class="grid" x1="72" y1="526.0" x2="856" y2="526.0"/>
+<text class="axis" x="64" y="530.0" text-anchor="end">10 ms</text>
+<line class="grid" x1="72" y1="494.0" x2="856" y2="494.0"/>
+<text class="axis" x="64" y="498.0" text-anchor="end">100 ms</text>
+<line class="grid" x1="72" y1="462.0" x2="856" y2="462.0"/>
+<text class="axis" x="64" y="466.0" text-anchor="end">1 s</text>
+<line class="grid" x1="72" y1="430.0" x2="856" y2="430.0"/>
+<text class="axis" x="64" y="434.0" text-anchor="end">10 s</text>
+<line class="grid" x1="72" y1="398.0" x2="856" y2="398.0"/>
+<text class="axis" x="64" y="402.0" text-anchor="end">100 s</text>
+<rect class="secure" x="83.0" y="281.6" width="42" height="54.4" rx="2"/>
+<text class="val" x="104.0" y="277.6" text-anchor="middle">11.5k</text>
+<rect class="internal" x="131.0" y="263.9" width="42" height="72.1" rx="2"/>
+<text class="val" x="152.0" y="259.9" text-anchor="middle">15.2k</text>
+<rect class="secure" x="83.0" y="549.8" width="42" height="8.2" rx="2"/>
+<text class="val" x="104.0" y="545.8" text-anchor="middle">1.8ms</text>
+<rect class="internal" x="131.0" y="553.8" width="42" height="4.2" rx="2"/>
+<text class="val" x="152.0" y="549.8" text-anchor="middle">1.4ms</text>
+<text class="gain" x="128.0" y="132" text-anchor="middle">1.33x</text>
+<text class="gain" x="128.0" y="388" text-anchor="middle">25% faster</text>
+<text class="axis" x="128.0" y="578" text-anchor="middle">8</text>
+<rect class="secure" x="195.0" y="244.7" width="42" height="91.3" rx="2"/>
+<text class="val" x="216.0" y="240.7" text-anchor="middle">19.2k</text>
+<rect class="internal" x="243.0" y="208.7" width="42" height="127.3" rx="2"/>
+<text class="val" x="264.0" y="204.7" text-anchor="middle">26.8k</text>
+<rect class="secure" x="195.0" y="535.0" width="42" height="23.0" rx="2"/>
+<text class="val" x="216.0" y="531.0" text-anchor="middle">5.2ms</text>
+<rect class="internal" x="243.0" y="537.6" width="42" height="20.4" rx="2"/>
+<text class="val" x="264.0" y="533.6" text-anchor="middle">4.3ms</text>
+<text class="gain" x="240.0" y="132" text-anchor="middle">1.39x</text>
+<text class="gain" x="240.0" y="388" text-anchor="middle">17% faster</text>
+<text class="axis" x="240.0" y="578" text-anchor="middle">32</text>
+<rect class="secure" x="307.0" y="229.5" width="42" height="106.5" rx="2"/>
+<text class="val" x="328.0" y="225.5" text-anchor="middle">22.4k</text>
+<rect class="internal" x="355.0" y="189.0" width="42" height="147.0" rx="2"/>
+<text class="val" x="376.0" y="185.0" text-anchor="middle">31.0k</text>
+<rect class="secure" x="307.0" y="514.9" width="42" height="43.1" rx="2"/>
+<text class="val" x="328.0" y="510.9" text-anchor="middle">22ms</text>
+<rect class="internal" x="355.0" y="515.5" width="42" height="42.5" rx="2"/>
+<text class="val" x="376.0" y="511.5" text-anchor="middle">21ms</text>
+<text class="gain" x="352.0" y="132" text-anchor="middle">1.38x</text>
+<text class="gain" x="352.0" y="388" text-anchor="middle">4% faster</text>
+<text class="axis" x="352.0" y="578" text-anchor="middle">128</text>
+<rect class="secure" x="419.0" y="228.9" width="42" height="107.1" rx="2"/>
+<text class="val" x="440.0" y="224.9" text-anchor="middle">22.5k</text>
+<rect class="internal" x="467.0" y="177.8" width="42" height="158.2" rx="2"/>
+<text class="val" x="488.0" y="173.8" text-anchor="middle">33.3k</text>
+<rect class="secure" x="419.0" y="501.2" width="42" height="56.8" rx="2"/>
+<text class="val" x="440.0" y="497.2" text-anchor="middle">60ms</text>
+<rect class="internal" x="467.0" y="504.9" width="42" height="53.1" rx="2"/>
+<text class="val" x="488.0" y="500.9" text-anchor="middle">46ms</text>
+<text class="gain" x="464.0" y="132" text-anchor="middle">1.48x</text>
+<text class="gain" x="464.0" y="388" text-anchor="middle">24% faster</text>
+<text class="axis" x="464.0" y="578" text-anchor="middle">512</text>
+<rect class="secure" x="531.0" y="238.6" width="42" height="97.4" rx="2"/>
+<text class="val" x="552.0" y="234.6" text-anchor="middle">20.5k</text>
+<rect class="internal" x="579.0" y="175.2" width="42" height="160.8" rx="2"/>
+<text class="val" x="600.0" y="171.2" text-anchor="middle">33.8k</text>
+<rect class="secure" x="531.0" y="484.0" width="42" height="74.0" rx="2"/>
+<text class="val" x="552.0" y="480.0" text-anchor="middle">206ms</text>
+<rect class="internal" x="579.0" y="491.5" width="42" height="66.5" rx="2"/>
+<text class="val" x="600.0" y="487.5" text-anchor="middle">120ms</text>
+<text class="gain" x="576.0" y="132" text-anchor="middle">1.65x</text>
+<text class="gain" x="576.0" y="388" text-anchor="middle">42% faster</text>
+<text class="axis" x="576.0" y="578" text-anchor="middle">2,048</text>
+<rect class="secure" x="643.0" y="250.1" width="42" height="85.9" rx="2"/>
+<text class="val" x="664.0" y="246.1" text-anchor="middle">18.1k</text>
+<rect class="internal" x="691.0" y="197.9" width="42" height="138.1" rx="2"/>
+<text class="val" x="712.0" y="193.9" text-anchor="middle">29.1k</text>
+<rect class="secure" x="643.0" y="465.9" width="42" height="92.1" rx="2"/>
+<text class="val" x="664.0" y="461.9" text-anchor="middle">753ms</text>
+<rect class="internal" x="691.0" y="472.4" width="42" height="85.6" rx="2"/>
+<text class="val" x="712.0" y="468.4" text-anchor="middle">474ms</text>
+<text class="gain" x="688.0" y="132" text-anchor="middle">1.61x</text>
+<text class="gain" x="688.0" y="388" text-anchor="middle">37% faster</text>
+<text class="axis" x="688.0" y="578" text-anchor="middle">8,192</text>
+<rect class="secure" x="755.0" y="266.9" width="42" height="69.1" rx="2"/>
+<text class="val" x="776.0" y="262.9" text-anchor="middle">14.6k</text>
+<rect class="internal" x="803.0" y="233.6" width="42" height="102.4" rx="2"/>
+<text class="val" x="824.0" y="229.6" text-anchor="middle">21.6k</text>
+<rect class="secure" x="755.0" y="453.4" width="42" height="104.6" rx="2"/>
+<text class="val" x="776.0" y="449.4" text-anchor="middle">1.9s</text>
+<rect class="internal" x="803.0" y="457.5" width="42" height="100.5" rx="2"/>
+<text class="val" x="824.0" y="453.5" text-anchor="middle">1.4s</text>
+<text class="gain" x="800.0" y="132" text-anchor="middle">1.48x</text>
+<text class="gain" x="800.0" y="388" text-anchor="middle">26% faster</text>
+<text class="axis" x="800.0" y="578" text-anchor="middle">16,384</text>
+<text class="axis" x="464.0" y="602" text-anchor="middle">concurrent connections (every connection busy)</text>
+<text class="sub" x="72" y="638">Teal figures: edge offload throughput gain (top) and how much lower its p99 latency is (bottom). 0 errors at every level shown.</text>
+<text class="sub" x="72" y="656">Above 16,384 connections both paths are overloaded (queueing, not slowness); see RESULTS.md.</text>
+</svg>

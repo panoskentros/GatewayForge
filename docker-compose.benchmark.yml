@@ -3,9 +3,28 @@ services:
     environment:
       RateLimiting__PermitLimit: "1000000000"
       Logging__LogLevel__Default: Warning
+    sysctls:
+      net.core.somaxconn: "65535"
   secure-service:
     environment:
       Logging__LogLevel__Default: Warning
   internal-service:
     environment:
       Logging__LogLevel__Default: Warning
+  loadtest:
+    profiles: ["loadtest"]
+    build:
+      context: .
+      dockerfile: GatewayForge.LoadTest/Dockerfile
+    environment:
+      LOADTEST_GATEWAY: http://gateway:8080
+      LOADTEST_KEYCLOAK: http://keycloak:8080
+      DOTNET_gcServer: "1"
+      DOTNET_gcConcurrent: "0"
+    sysctls:
+      net.ipv4.ip_local_port_range: "1024 65535"
+    depends_on:
+      gateway:
+        condition: service_healthy
+    networks:
+      - edge-net

@@ -10,4 +10,3 @@ GatewayForge.Tests/
 keycloak/
 *.md
 docker-compose*.yml
-GatewayForge.LoadTest/

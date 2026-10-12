@@ -14,6 +14,7 @@ internal sealed record Options(
     int WarmupSeconds,
     int Rounds,
     int Requests,
+    int RampSeconds,
     string Levels,
     string Mode)
 {
@@ -28,8 +29,8 @@ internal sealed record Options(
         string Get(string key, string fallback) => values.TryGetValue(key, out var value) ? value : fallback;
 
         return new Options(
-            Get("gateway", "http://localhost:5100"),
-            Get("keycloak", "http://localhost:8080"),
+            Get("gateway", Environment.GetEnvironmentVariable("LOADTEST_GATEWAY") ?? "http://localhost:5100"),
+            Get("keycloak", Environment.GetEnvironmentVariable("LOADTEST_KEYCLOAK") ?? "http://localhost:8080"),
             Get("user", "testuser"),
             Get("password", "123456"),
             Get("admin-user", "admin"),
@@ -41,6 +42,7 @@ internal sealed record Options(
             int.Parse(Get("warmup", "3")),
             int.Parse(Get("rounds", "1")),
             int.Parse(Get("requests", "500000")),
+            int.Parse(Get("ramp", "-1")),
             Get("levels", "16,64,256,1024"),
             Get("mode", "compare").ToLowerInvariant());
     }

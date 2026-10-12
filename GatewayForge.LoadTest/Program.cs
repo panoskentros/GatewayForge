@@ -15,7 +15,7 @@ using var handler = new SocketsHttpHandler
     MaxConnectionsPerServer = Math.Max(options.Concurrency, levels.Max()),
     PooledConnectionLifetime = TimeSpan.FromMinutes(10)
 };
-using var client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) };
+using var client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(120) };
 
 string token;
 try
@@ -69,26 +69,51 @@ if (options.Mode is "volume" or "sweep")
         return 0;
     }
 
-    Console.WriteLine($"Sweep: {options.DurationSeconds}s per path at each concurrency level.");
+    Console.WriteLine(
+        $"Sweep: {options.DurationSeconds}s per path at each concurrency level, " +
+        "every connection busy (closed loop).");
     Console.WriteLine();
     Console.WriteLine(
-        $"{"conns",7}{"secure req/s",15}{"internal req/s",16}{"offload gain",14}{"secure p99",12}{"internal p99",14}{"errors",8}");
-    Console.WriteLine(new string('-', 86));
+        $"{"conns",7}{"secure req/s",14}{"internal req/s",16}{"gain",8}" +
+        $"{"p50 s/i ms",16}{"p99 s/i ms",20}{"errors",8}");
+    Console.WriteLine(new string('-', 89));
 
+    var highestClean = 0;
     foreach (var level in levels)
     {
-        var secureRun = await LoadRunner.RunAsync(
-            client, pair[0], token, level, TimeSpan.FromSeconds(options.DurationSeconds));
-        var internalRun = await LoadRunner.RunAsync(
-            client, pair[1], token, level, TimeSpan.FromSeconds(options.DurationSeconds));
+        var ramp = TimeSpan.FromSeconds(options.RampSeconds >= 0 ? options.RampSeconds : Math.Clamp(level / 2000, 1, 40));
+        var measured = TimeSpan.FromSeconds(options.DurationSeconds);
 
+        var secureRun = await LoadRunner.RunAsync(
+            client, pair[0], token, level, measured, 0, ramp);
+        var internalRun = await LoadRunner.RunAsync(
+            client, pair[1], token, level, measured, 0, TimeSpan.Zero);
+
+        var errors = secureRun.NonSuccess + internalRun.NonSuccess;
         Console.WriteLine(
-            $"{level,7}{secureRun.RequestsPerSecond,15:N0}{internalRun.RequestsPerSecond,16:N0}" +
-            $"{internalRun.RequestsPerSecond / secureRun.RequestsPerSecond,13:F2}x" +
-            $"{Report.Percentile(secureRun.Samples, 0.99),11:F1}ms{Report.Percentile(internalRun.Samples, 0.99),12:F1}ms" +
-            $"{secureRun.NonSuccess + internalRun.NonSuccess,8:N0}");
+            $"{level,7}{secureRun.RequestsPerSecond,14:N0}{internalRun.RequestsPerSecond,16:N0}" +
+            $"{internalRun.RequestsPerSecond / secureRun.RequestsPerSecond,7:F2}x" +
+            $"{Report.Percentile(secureRun.Samples, 0.50),9:F1} /{Report.Percentile(internalRun.Samples, 0.50),6:F1}" +
+            $"{Report.Percentile(secureRun.Samples, 0.99),12:F1} /{Report.Percentile(internalRun.Samples, 0.99),7:F1}" +
+            $"{errors,8:N0}");
+
+        if (errors > 0)
+        {
+            Console.WriteLine();
+            Console.WriteLine($"Errors appeared at {level:N0} connections; stopping. Error kinds:");
+            foreach (var kind in LoadRunner.DrainErrorKinds().OrderByDescending(pair => pair.Value))
+            {
+                Console.WriteLine($"  {kind.Value,8:N0}  {kind.Key}");
+            }
+
+            break;
+        }
+
+        highestClean = level;
     }
 
+    Console.WriteLine();
+    Console.WriteLine($"Highest level with 0 errors: {highestClean:N0} concurrent connections.");
     return 0;
 }
 
